@@ -1,9 +1,9 @@
 SHELL 		:= /bin/bash
 
-PROJECTS 	:= cli prelude plugin-json plugin-markdown plugin-yaml
+PROJECTS 	:= prelude plugin-json plugin-markdown plugin-yaml cli
 TARGET		:= target
 SRC_FILES 	:= $(shell find $(PROJECTS) -name '*.rs')
-TOML 		:= $(shell find $(PROJECTS) -name '*.toml') Cargo.toml
+TOML 		:= $(shell find $(PROJECTS) -name '*.toml')
 
 target/debug/cryogen: $(TOML) $(SRC_FILES)
 	@cargo build --manifest-path cli/Cargo.toml

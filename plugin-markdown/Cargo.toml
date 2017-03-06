@@ -2,6 +2,11 @@
 name = "cryogen_plugin_markdown"
 version = "0.1.0"
 authors = ["Ferris Tseng <ferristseng@fastmail.fm>"]
+description = "Markdown plugin for cryogen"
+license = "MIT"
+license_file = "../LICENSE"
+homepage = "https://github.com/ferristseng/cryogen"
+repository = "https://github.com/ferristseng/cryogen"
 
 [dependencies]
 serde = "0.9.*"

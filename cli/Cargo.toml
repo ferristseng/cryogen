@@ -2,6 +2,11 @@
 name = "cryogen"
 version = "0.1.0"
 authors = ["Ferris Tseng <ferristseng@fastmail.fm>"]
+description = "CLI for rendering Tera templates from data files"
+license = "MIT"
+license_file = "../LICENSE"
+homepage = "https://github.com/ferristseng/cryogen"
+repository = "https://github.com/ferristseng/cryogen"
 
 [dependencies]
 tera = "0.8.*"
