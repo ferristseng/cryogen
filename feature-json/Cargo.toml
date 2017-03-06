@@ -1,0 +1,9 @@
+[package]
+name = "feature_json"
+version = "0.1.0"
+authors = ["Ferris Tseng <ferristseng@fastmail.fm>"]
+
+[dependencies]
+clap = "2.20.*"
+serde_json = "0.9"
+lib = { version = "*", path = "../lib" }

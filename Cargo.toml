@@ -1,0 +1,12 @@
+[workspace]
+members = [
+    "cli",
+    "feature-json",
+    "feature-markdown",
+    "lib"
+]
+
+[dependencies]
+serde = "0.9.*"
+tera = "0.8.*"
+clap = "2.20.*"

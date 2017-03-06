@@ -1,0 +1,20 @@
+[package]
+name = "cryogen"
+version = "0.1.0"
+authors = ["Ferris Tseng <ferristseng@fastmail.fm>"]
+
+[dependencies]
+tera = "0.8.*"
+clap = "2.20.*"
+lib = { version = "*", path = "../lib" }
+feature_json = { version = "*", path = "../feature-json", optional = true }
+feature_markdown = { version = "*", path = "../feature-markdown", optional = true }
+
+[features]
+default = [
+    "json",
+    "markdown"
+]
+
+json = ["feature_json"]
+markdown = ["feature_markdown"]

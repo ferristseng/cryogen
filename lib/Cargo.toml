@@ -1,0 +1,9 @@
+[package]
+name = "lib"
+version = "0.1.0"
+authors = ["Ferris Tseng <ferristseng@fastmail.fm>"]
+
+[dependencies]
+serde = "0.9.*"
+tera = "0.8.*"
+clap = "2.20.*"
