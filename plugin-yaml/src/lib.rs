@@ -1,11 +1,11 @@
 extern crate clap;
-extern crate lib;
+extern crate cryogen_prelude;
 extern crate serde_yaml;
 
 use clap::{Arg, ArgMatches};
 use std::fs::File;
 
-use lib::CompileVariablePlugin;
+use cryogen_prelude::CompileVariablePlugin;
 
 
 pub struct YamlPlugin;

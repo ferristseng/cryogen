@@ -1,5 +1,5 @@
 [package]
-name = "feature_markdown"
+name = "cryogen_plugin_markdown"
 version = "0.1.0"
 authors = ["Ferris Tseng <ferristseng@fastmail.fm>"]
 
@@ -9,4 +9,4 @@ serde_derive = "0.9.*"
 serde_yaml = "0.6.*"
 clap = "2.20.*"
 hoedown = "6.0.*"
-lib = { version = "*", path = "../lib" }
+cryogen_prelude = { version = "*", path = "../prelude" }

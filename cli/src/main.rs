@@ -1,20 +1,20 @@
 extern crate clap;
-extern crate lib;
+extern crate cryogen_prelude;
 extern crate tera;
 #[cfg(feature = "json")]
-extern crate feature_json;
+extern crate cryogen_plugin_json;
 #[cfg(feature = "markdown")]
-extern crate feature_markdown;
+extern crate cryogen_plugin_markdown;
 #[cfg(feature = "yaml")]
-extern crate feature_yaml;
+extern crate cryogen_plugin_yaml;
 
 use clap::{Arg, ArgMatches, App, SubCommand};
-use tera::{Context, Tera};
-
-use lib::{CompileVariablePlugin, VarMapping};
-
 use std::fs::File;
 use std::io::{Read, Write};
+use tera::{Context, Tera};
+
+use cryogen_prelude::{CompileVariablePlugin, VarMapping};
+
 
 // Opens the tera template specified in ArgMatches.
 //
@@ -30,6 +30,7 @@ fn open_template<'a>(args: &'a ArgMatches<'a>) -> (&'a str, String) {
         Err(e) => panic!(format!("failed to open template ({}): {:?}", file_path, e)),
     }
 }
+
 
 // Command to render a single output file from a tera template.
 //
@@ -74,11 +75,11 @@ impl SingleCommand {
         let mut plugins = Vec::new();
 
         #[cfg(feature = "json")]
-        SingleCommand::register_plugin::<feature_json::JsonPlugin>(&mut plugins);
+        SingleCommand::register_plugin::<cryogen_plugin_json::JsonPlugin>(&mut plugins);
         #[cfg(feature = "markdown")]
-        SingleCommand::register_plugin::<feature_markdown::MarkdownPlugin>(&mut plugins);
+        SingleCommand::register_plugin::<cryogen_plugin_markdown::MarkdownPlugin>(&mut plugins);
         #[cfg(feature = "yaml")]
-        SingleCommand::register_plugin::<feature_yaml::YamlPlugin>(&mut plugins);
+        SingleCommand::register_plugin::<cryogen_plugin_yaml::YamlPlugin>(&mut plugins);
 
         SubCommand::with_name(SingleCommand::command_name())
             .about("Renders a single output file")
@@ -94,11 +95,12 @@ impl SingleCommand {
         let mut template_vars = Context::new();
 
         #[cfg(feature = "json")]
-        SingleCommand::exec_plugin::<feature_json::JsonPlugin>(&args, &mut template_vars);
+        SingleCommand::exec_plugin::<cryogen_plugin_json::JsonPlugin>(&args, &mut template_vars);
         #[cfg(feature = "markdown")]
-        SingleCommand::exec_plugin::<feature_markdown::MarkdownPlugin>(&args, &mut template_vars);
+        SingleCommand::exec_plugin::<cryogen_plugin_markdown::MarkdownPlugin>(&args,
+                                                                              &mut template_vars);
         #[cfg(feature = "yaml")]
-        SingleCommand::exec_plugin::<feature_yaml::YamlPlugin>(&args, &mut template_vars);
+        SingleCommand::exec_plugin::<cryogen_plugin_yaml::YamlPlugin>(&args, &mut template_vars);
 
         match Tera::one_off(&template_contents, &template_vars, false) {
             Ok(rendered) => {
@@ -112,6 +114,7 @@ impl SingleCommand {
         };
     }
 }
+
 
 fn main() {
     let app = App::new("Cryogen")

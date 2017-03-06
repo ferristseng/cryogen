@@ -6,10 +6,10 @@ authors = ["Ferris Tseng <ferristseng@fastmail.fm>"]
 [dependencies]
 tera = "0.8.*"
 clap = "2.20.*"
-lib = { version = "*", path = "../lib" }
-feature_json = { version = "*", path = "../feature-json", optional = true }
-feature_markdown = { version = "*", path = "../feature-markdown", optional = true }
-feature_yaml = { version = "*", path = "../feature-yaml", optional = true }
+cryogen_prelude = { version = "*", path = "../prelude" }
+cryogen_plugin_json = { version = "*", path = "../plugin-json", optional = true }
+cryogen_plugin_markdown = { version = "*", path = "../plugin-markdown", optional = true }
+cryogen_plugin_yaml = { version = "*", path = "../plugin-yaml", optional = true }
 
 [features]
 default = [
@@ -18,6 +18,6 @@ default = [
     "yaml"
 ]
 
-json = ["feature_json"]
-markdown = ["feature_markdown"]
-yaml = ["feature_yaml"]
+json = ["cryogen_plugin_json"]
+markdown = ["cryogen_plugin_markdown"]
+yaml = ["cryogen_plugin_yaml"]

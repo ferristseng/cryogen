@@ -1,6 +1,6 @@
 SHELL 		:= /bin/bash
 
-PROJECTS 	:= cli lib feature-json feature-markdown feature-yaml
+PROJECTS 	:= cli prelude plugin-json plugin-markdown plugin-yaml
 TARGET		:= target
 SRC_FILES 	:= $(shell find $(PROJECTS) -name '*.rs')
 TOML 		:= $(shell find $(PROJECTS) -name '*.toml') Cargo.toml

@@ -1,6 +1,6 @@
 extern crate clap;
+extern crate cryogen_prelude;
 extern crate hoedown;
-extern crate lib;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -13,7 +13,7 @@ use hoedown::renderer::html::{Flags, Html};
 use std::io::{BufRead, BufReader, Seek, SeekFrom};
 use std::fs::File;
 
-use lib::CompileVariablePlugin;
+use cryogen_prelude::CompileVariablePlugin;
 
 
 /// Value written to Tera context.

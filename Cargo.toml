@@ -1,10 +1,10 @@
 [workspace]
 members = [
     "cli",
-    "feature-json",
-    "feature-markdown",
-    "feature-yaml",
-    "lib"
+    "plugin-json",
+    "plugin-markdown",
+    "plugin-yaml",
+    "prelude"
 ]
 
 [dependencies]
