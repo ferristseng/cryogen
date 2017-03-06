@@ -22,7 +22,7 @@ impl CompileVariablePlugin for JsonPlugin {
     }
 
     fn arg_help() -> &'static str {
-        "Assign variable to contents of JSON value"
+        "Assign variable to contents of JSON file"
     }
 
 
