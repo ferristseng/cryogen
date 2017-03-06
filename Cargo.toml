@@ -3,6 +3,7 @@ members = [
     "cli",
     "feature-json",
     "feature-markdown",
+    "feature-yaml",
     "lib"
 ]
 

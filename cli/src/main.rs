@@ -5,6 +5,8 @@ extern crate tera;
 extern crate feature_json;
 #[cfg(feature = "markdown")]
 extern crate feature_markdown;
+#[cfg(feature = "yaml")]
+extern crate feature_yaml;
 
 use clap::{Arg, ArgMatches, App, SubCommand};
 use tera::{Context, Tera};
@@ -75,6 +77,8 @@ impl SingleCommand {
         SingleCommand::register_plugin::<feature_json::JsonPlugin>(&mut plugins);
         #[cfg(feature = "markdown")]
         SingleCommand::register_plugin::<feature_markdown::MarkdownPlugin>(&mut plugins);
+        #[cfg(feature = "yaml")]
+        SingleCommand::register_plugin::<feature_yaml::YamlPlugin>(&mut plugins);
 
         SubCommand::with_name(SingleCommand::command_name())
             .about("Renders a single output file")
@@ -93,6 +97,8 @@ impl SingleCommand {
         SingleCommand::exec_plugin::<feature_json::JsonPlugin>(&args, &mut template_vars);
         #[cfg(feature = "markdown")]
         SingleCommand::exec_plugin::<feature_markdown::MarkdownPlugin>(&args, &mut template_vars);
+        #[cfg(feature = "yaml")]
+        SingleCommand::exec_plugin::<feature_yaml::YamlPlugin>(&args, &mut template_vars);
 
         match Tera::one_off(&template_contents, &template_vars, false) {
             Ok(rendered) => {

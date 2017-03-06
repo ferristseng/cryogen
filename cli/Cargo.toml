@@ -9,12 +9,15 @@ clap = "2.20.*"
 lib = { version = "*", path = "../lib" }
 feature_json = { version = "*", path = "../feature-json", optional = true }
 feature_markdown = { version = "*", path = "../feature-markdown", optional = true }
+feature_yaml = { version = "*", path = "../feature-yaml", optional = true }
 
 [features]
 default = [
     "json",
-    "markdown"
+    "markdown",
+    "yaml"
 ]
 
 json = ["feature_json"]
 markdown = ["feature_markdown"]
+yaml = ["feature_yaml"]
