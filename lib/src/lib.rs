@@ -14,7 +14,7 @@ use clap::{Arg, ArgMatches};
 #[derive(Debug)]
 pub struct VarMapping<'a> {
     var_name: &'a str,
-    file_path: &'a str
+    file_path: &'a str,
 }
 
 impl<'a> VarMapping<'a> {
@@ -31,7 +31,7 @@ impl<'a> VarMapping<'a> {
                     file_path: file_path,
                 })
             }
-            None => Err("Expected a ':' in var mapping string")
+            None => Err("Expected a ':' in var mapping string"),
         }
     }
 
@@ -63,7 +63,7 @@ impl<'a> VarMapping<'a> {
 pub trait CompileVariablePlugin {
     /// The serializable value to add to the Tera context.
     ///
-    type RenderValue : Serialize;
+    type RenderValue: Serialize;
 
     /// The name of the plugin.
     ///
