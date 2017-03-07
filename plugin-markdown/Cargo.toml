@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Ferris Tseng <ferristseng@fastmail.fm>"]
 description = "Markdown plugin for cryogen"
 license = "MIT"
-license_file = "../LICENSE"
+license-file = "../LICENSE"
 homepage = "https://github.com/ferristseng/cryogen"
 repository = "https://github.com/ferristseng/cryogen"
 
@@ -14,4 +14,4 @@ serde_derive = "0.9.*"
 serde_yaml = "0.6.*"
 clap = "2.20.*"
 hoedown = "6.0.*"
-cryogen_prelude = { version = "*", path = "../prelude" }
+cryogen_prelude = { version = "0.1.*", path = "../prelude" }

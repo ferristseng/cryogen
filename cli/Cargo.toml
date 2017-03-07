@@ -4,17 +4,17 @@ version = "0.1.0"
 authors = ["Ferris Tseng <ferristseng@fastmail.fm>"]
 description = "CLI for rendering Tera templates from data files"
 license = "MIT"
-license_file = "../LICENSE"
+license-file = "../LICENSE"
 homepage = "https://github.com/ferristseng/cryogen"
 repository = "https://github.com/ferristseng/cryogen"
 
 [dependencies]
 tera = "0.8.*"
 clap = "2.20.*"
-cryogen_prelude = { version = "*", path = "../prelude" }
-cryogen_plugin_json = { version = "*", path = "../plugin-json", optional = true }
-cryogen_plugin_markdown = { version = "*", path = "../plugin-markdown", optional = true }
-cryogen_plugin_yaml = { version = "*", path = "../plugin-yaml", optional = true }
+cryogen_prelude = { version = "0.1.*", path = "../prelude" }
+cryogen_plugin_json = { version = "0.1.*", path = "../plugin-json", optional = true }
+cryogen_plugin_markdown = { version = "0.1.*", path = "../plugin-markdown", optional = true }
+cryogen_plugin_yaml = { version = "0.1.*", path = "../plugin-yaml", optional = true }
 
 [features]
 default = [

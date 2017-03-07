@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Ferris Tseng <ferristseng@fastmail.fm>"]
 description = "Common library for all cryogen modules"
 license = "MIT"
-license_file = "../LICENSE"
+license-file = "../LICENSE"
 homepage = "https://github.com/ferristseng/cryogen"
 repository = "https://github.com/ferristseng/cryogen"
 
