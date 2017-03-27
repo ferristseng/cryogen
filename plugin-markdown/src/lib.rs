@@ -84,9 +84,11 @@ fn read_header(file: &mut File) -> Result<Vec<u8>, String> {
                     // find the beginning.
                     //
                     return match reader.seek(SeekFrom::Start(bytes_read + bytes_num as u64)) {
-                        Ok(_) => Ok(data),
-                        Err(e) => Err(format!("failed to seek to start of markdown: {:?}", e)),
-                    };
+                               Ok(_) => Ok(data),
+                               Err(e) => {
+                                   Err(format!("failed to seek to start of markdown: {:?}", e))
+                               }
+                           };
                 }
                 Ok(bytes_num) => bytes_read += bytes_num as u64,
                 Err(e) => {
@@ -187,7 +189,7 @@ impl CompileVariablePlugin for MarkdownPlugin {
         }
     }
 
-    fn read_file(&self, mut file: File) -> Result<RenderedMarkdown, String> {
+    fn read_arg(&self, path: &str) -> Result<RenderedMarkdown, String> {
         let mut extensions = Extension::empty();
 
         if self.autolink {
@@ -246,6 +248,10 @@ impl CompileVariablePlugin for MarkdownPlugin {
             extensions.insert(hoedown::UNDERLINE);
         }
 
+        let mut file = match File::open(path) {
+            Ok(file) => file,
+            Err(e) => return Err(format!("{:?}", e)),
+        };
         let metadata = if self.yaml_metadata {
             let metadata_bytes = try!(read_header(&mut file));
 
@@ -256,7 +262,6 @@ impl CompileVariablePlugin for MarkdownPlugin {
         } else {
             None
         };
-
         let markdown = Markdown::read_from(file).extensions(extensions);
         let mut html = Html::new(Flags::empty(), 0);
         let output = html.render(&markdown);

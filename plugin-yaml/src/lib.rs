@@ -34,9 +34,14 @@ impl CompileVariablePlugin for YamlPlugin {
         YamlPlugin
     }
 
-    fn read_file(&self, mut file: File) -> Result<Self::RenderValue, String> {
-        match serde_yaml::from_reader(&mut file) {
-            Ok(obj) => Ok(obj),
+    fn read_arg(&self, path: &str) -> Result<Self::RenderValue, String> {
+        match File::open(path) {
+            Ok(mut file) => {
+                match serde_yaml::from_reader(&mut file) {
+                    Ok(obj) => Ok(obj),
+                    Err(e) => Err(format!("{:?}", e)),
+                }
+            }
             Err(e) => Err(format!("{:?}", e)),
         }
     }

@@ -1,0 +1,12 @@
+[package]
+name = "cryogen_plugin_primitives"
+version = "0.1.0"
+authors = ["Ferris Tseng <ferristseng@fastmail.fm>"]
+description = "Primitives plugin for Cryogen"
+license-file = "../LICENSE"
+homepage = "https://github.com/ferristseng/cryogen"
+repository = "https://github.com/ferristseng/cryogen"
+
+[dependencies]
+clap = "2.20.*"
+cryogen_prelude = { version = "0.1.*", path = "../prelude" }

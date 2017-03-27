@@ -1,6 +1,7 @@
 SHELL 		:= /bin/bash
 
-PROJECTS 	:= prelude plugin-json plugin-markdown plugin-yaml cli
+PROJECTS 	:= prelude plugin-json plugin-markdown plugin-primitives \
+						 plugin-yaml cli
 TARGET		:= target
 SRC_FILES 	:= $(shell find $(PROJECTS) -name '*.rs')
 TOML 		:= $(shell find $(PROJECTS) -name '*.toml')

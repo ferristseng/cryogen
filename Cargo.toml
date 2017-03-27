@@ -3,6 +3,7 @@ members = [
     "cli",
     "plugin-json",
     "plugin-markdown",
+    "plugin-primitives",
     "plugin-yaml",
     "prelude"
 ]

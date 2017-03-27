@@ -2,8 +2,6 @@ extern crate clap;
 extern crate serde;
 
 use serde::Serialize;
-use std::fs::File;
-use std::path::Path;
 
 use clap::{Arg, ArgMatches};
 
@@ -14,7 +12,7 @@ use clap::{Arg, ArgMatches};
 #[derive(Debug)]
 pub struct VarMapping<'a> {
     var_name: &'a str,
-    file_path: &'a str,
+    arg_value: &'a str,
 }
 
 impl<'a> VarMapping<'a> {
@@ -25,11 +23,11 @@ impl<'a> VarMapping<'a> {
         let var_name = splits.next().unwrap();
 
         match splits.next() {
-            Some(file_path) => {
+            Some(arg_value) => {
                 Ok(VarMapping {
-                    var_name: var_name,
-                    file_path: file_path,
-                })
+                       var_name: var_name,
+                       arg_value: arg_value,
+                   })
             }
             None => Err("Expected a ':' in var mapping string"),
         }
@@ -46,8 +44,8 @@ impl<'a> VarMapping<'a> {
     }
 
     #[inline]
-    pub fn file_path(&self) -> &'a str {
-        self.file_path
+    pub fn arg_value(&self) -> &'a str {
+        self.arg_value
     }
 
     #[inline]
@@ -85,16 +83,7 @@ pub trait CompileVariablePlugin {
     ///
     fn from_args<'a>(args: &'a ArgMatches<'a>) -> Self;
 
-    /// Reads and parses the supplied file. The result is stored in the Tera context.
+    /// Reads the argument and returns a RenderValue instance.
     ///
-    fn read_file(&self, file: File) -> Result<Self::RenderValue, String>;
-
-    /// Reads and parses a file at a specific path.
-    ///
-    fn read_path<P: AsRef<Path>>(&self, path: P) -> Result<Self::RenderValue, String> {
-        match File::open(path) {
-            Ok(file) => self.read_file(file),
-            Err(e) => Err(format!("{:?}", e)),
-        }
-    }
+    fn read_arg(&self, arg: &str) -> Result<Self::RenderValue, String>;
 }

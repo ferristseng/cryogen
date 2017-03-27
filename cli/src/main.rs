@@ -1,6 +1,7 @@
 extern crate clap;
 extern crate cryogen_prelude;
 extern crate tera;
+extern crate cryogen_plugin_primitives;
 #[cfg(feature = "json")]
 extern crate cryogen_plugin_json;
 #[cfg(feature = "markdown")]
@@ -48,7 +49,7 @@ impl SingleCommand {
         match args.values_of(T::arg_full_name()) {
             Some(mappings) => {
                 for mapping in mappings.map(VarMapping::from_str_panic) {
-                    match plugin.read_path(mapping.file_path()) {
+                    match plugin.read_arg(mapping.arg_value()) {
                         Ok(value) => template_vars.add(mapping.var_name(), &value),
                         Err(e) => {
                             panic!(format!("failed to parse file for var ({}): {:?}",
@@ -64,16 +65,20 @@ impl SingleCommand {
 
     fn register_plugin<T: CompileVariablePlugin>(plugins: &mut Vec<Arg<'static, 'static>>) {
         plugins.push(Arg::with_name(T::plugin_name())
-            .long(T::arg_full_name())
-            .help(T::arg_help())
-            .takes_value(true)
-            .multiple(true));
+                         .long(T::arg_full_name())
+                         .help(T::arg_help())
+                         .takes_value(true)
+                         .multiple(true));
         plugins.extend(T::additional_args());
     }
 
     fn app<'a, 'b>() -> App<'a, 'b> {
         let mut plugins = Vec::new();
 
+        SingleCommand::register_plugin::<cryogen_plugin_primitives::StringPlugin>(&mut plugins);
+        SingleCommand::register_plugin::<cryogen_plugin_primitives::FloatPlugin>(&mut plugins);
+        SingleCommand::register_plugin::<cryogen_plugin_primitives::IntPlugin>(&mut plugins);
+        SingleCommand::register_plugin::<cryogen_plugin_primitives::BooleanPlugin>(&mut plugins);
         #[cfg(feature = "json")]
         SingleCommand::register_plugin::<cryogen_plugin_json::JsonPlugin>(&mut plugins);
         #[cfg(feature = "markdown")]
@@ -84,9 +89,9 @@ impl SingleCommand {
         SubCommand::with_name(SingleCommand::command_name())
             .about("Renders a single output file")
             .arg(Arg::with_name("TEMPLATE")
-                .help("The tera template to render")
-                .required(true)
-                .index(1))
+                     .help("The tera template to render")
+                     .required(true)
+                     .index(1))
             .args(&plugins)
     }
 
@@ -94,6 +99,10 @@ impl SingleCommand {
         let (template_path, template_contents) = open_template(&args);
         let mut template_vars = Context::new();
 
+        SingleCommand::exec_plugin::<cryogen_plugin_primitives::StringPlugin>(&args, &mut template_vars);
+        SingleCommand::exec_plugin::<cryogen_plugin_primitives::FloatPlugin>(&args, &mut template_vars);
+        SingleCommand::exec_plugin::<cryogen_plugin_primitives::IntPlugin>(&args, &mut template_vars);
+        SingleCommand::exec_plugin::<cryogen_plugin_primitives::BooleanPlugin>(&args, &mut template_vars);
         #[cfg(feature = "json")]
         SingleCommand::exec_plugin::<cryogen_plugin_json::JsonPlugin>(&args, &mut template_vars);
         #[cfg(feature = "markdown")]
