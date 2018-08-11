@@ -1,9 +1,13 @@
 extern crate clap;
 extern crate serde;
-
-use serde::Serialize;
+#[cfg(feature = "markdown")]
+extern crate serde_yaml;
 
 use clap::{Arg, ArgMatches};
+use serde::Serialize;
+
+#[cfg(feature = "markdown")]
+pub mod markdown;
 
 /// Defines a mapping between a template variable, and the file to
 /// populate it.
@@ -61,15 +65,15 @@ pub trait CompileVariablePlugin {
 
     /// The name of the plugin.
     ///
-    fn plugin_name() -> &'static str;
+    const PLUGIN_NAME: &'static str;
 
     /// The name of the argument that provides the variable name to file mapping.
     ///
-    fn arg_full_name() -> &'static str;
+    const ARG_NAME: &'static str;
 
     /// The help string to display.
     ///
-    fn arg_help() -> &'static str;
+    const HELP: &'static str;
 
     /// Optional arguments to supply. These should be prefixed to avoid namespace clashes.
     ///
