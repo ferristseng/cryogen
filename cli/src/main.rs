@@ -10,11 +10,10 @@ extern crate cryogen_prelude;
 extern crate tera;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
+use cryogen_prelude::{CompileVariablePlugin, VarMapping};
 use std::fs::File;
 use std::io::{Read, Write};
 use tera::{Context, Tera};
-
-use cryogen_prelude::{CompileVariablePlugin, VarMapping};
 
 // Opens the tera template specified in ArgMatches.
 //
@@ -36,9 +35,7 @@ fn open_template<'a>(args: &'a ArgMatches<'a>) -> (&'a str, String) {
 struct SingleCommand;
 
 impl SingleCommand {
-    fn command_name() -> &'static str {
-        "single"
-    }
+    const COMMAND_NAME: &'static str = "single";
 
     fn exec_plugin<'a, T: CompileVariablePlugin>(
         args: &ArgMatches<'a>,
@@ -46,7 +43,7 @@ impl SingleCommand {
     ) {
         let plugin = T::from_args(args);
 
-        match args.values_of(T::arg_full_name()) {
+        match args.values_of(T::ARG_NAME) {
             Some(mappings) => for mapping in mappings.map(VarMapping::from_str_panic) {
                 match plugin.read_arg(mapping.arg_value()) {
                     Ok(value) => template_vars.add(mapping.var_name(), &value),
@@ -63,11 +60,14 @@ impl SingleCommand {
         }
     }
 
-    fn register_plugin<T: CompileVariablePlugin>(plugins: &mut Vec<Arg<'static, 'static>>) {
+    fn register_plugin<T>(plugins: &mut Vec<Arg<'static, 'static>>)
+    where
+        T: CompileVariablePlugin,
+    {
         plugins.push(
-            Arg::with_name(T::plugin_name())
-                .long(T::arg_full_name())
-                .help(T::arg_help())
+            Arg::with_name(T::PLUGIN_NAME)
+                .long(T::ARG_NAME)
+                .help(T::HELP)
                 .takes_value(true)
                 .multiple(true),
         );
@@ -88,7 +88,7 @@ impl SingleCommand {
         #[cfg(feature = "yaml")]
         SingleCommand::register_plugin::<cryogen_plugin_yaml::YamlPlugin>(&mut plugins);
 
-        SubCommand::with_name(SingleCommand::command_name())
+        SubCommand::with_name(SingleCommand::COMMAND_NAME)
             .about("Renders a single output file")
             .arg(
                 Arg::with_name("TEMPLATE")
@@ -134,8 +134,9 @@ impl SingleCommand {
                 let _ = ::std::io::stdout().write_all(rendered.as_ref());
             }
             Err(e) => panic!(format!(
-                "failed one time render for template ({}): {:?}",
-                template_path, e
+                "failed one time render for template ({}): {}",
+                template_path,
+                e.description()
             )),
         };
     }
