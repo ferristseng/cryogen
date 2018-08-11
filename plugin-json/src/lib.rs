@@ -3,42 +3,34 @@ extern crate cryogen_prelude;
 extern crate serde_json;
 
 use clap::{Arg, ArgMatches};
-use std::fs::File;
-
 use cryogen_prelude::CompileVariablePlugin;
+use std::fs::File;
 
 pub struct JsonPlugin;
 
 impl CompileVariablePlugin for JsonPlugin {
     type RenderValue = serde_json::value::Value;
 
-    fn plugin_name() -> &'static str {
-        "json"
-    }
+    const PLUGIN_NAME: &'static str = "json";
 
-    fn arg_full_name() -> &'static str {
-        "json"
-    }
+    const ARG_NAME: &'static str = "json";
 
-    fn arg_help() -> &'static str {
-        "Assign variable to contents of JSON file"
-    }
+    const HELP: &'static str = "Assign variable to contents of JSON file";
 
+    #[inline]
     fn additional_args() -> Vec<Arg<'static, 'static>> {
         vec![]
     }
 
+    #[inline]
     fn from_args<'a>(_: &'a ArgMatches<'a>) -> JsonPlugin {
         JsonPlugin
     }
 
+    #[inline]
     fn read_arg(&self, path: &str) -> Result<Self::RenderValue, String> {
-        match File::open(path) {
-            Ok(mut file) => match serde_json::from_reader(&mut file) {
-                Ok(obj) => Ok(obj),
-                Err(e) => Err(format!("{:?}", e)),
-            },
-            Err(e) => Err(format!("{:?}", e)),
-        }
+        File::open(path)
+            .map_err(|e| e.to_string())
+            .and_then(|f| serde_json::from_reader(f).map_err(|e| e.to_string()))
     }
 }
