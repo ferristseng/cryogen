@@ -7,7 +7,6 @@ use std::fs::File;
 
 use cryogen_prelude::CompileVariablePlugin;
 
-
 pub struct JsonPlugin;
 
 impl CompileVariablePlugin for JsonPlugin {
@@ -25,7 +24,6 @@ impl CompileVariablePlugin for JsonPlugin {
         "Assign variable to contents of JSON file"
     }
 
-
     fn additional_args() -> Vec<Arg<'static, 'static>> {
         vec![]
     }
@@ -36,12 +34,10 @@ impl CompileVariablePlugin for JsonPlugin {
 
     fn read_arg(&self, path: &str) -> Result<Self::RenderValue, String> {
         match File::open(path) {
-            Ok(mut file) => {
-                match serde_json::from_reader(&mut file) {
-                    Ok(obj) => Ok(obj),
-                    Err(e) => Err(format!("{:?}", e)),
-                }
-            }
+            Ok(mut file) => match serde_json::from_reader(&mut file) {
+                Ok(obj) => Ok(obj),
+                Err(e) => Err(format!("{:?}", e)),
+            },
             Err(e) => Err(format!("{:?}", e)),
         }
     }

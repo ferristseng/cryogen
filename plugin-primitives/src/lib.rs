@@ -6,7 +6,6 @@ use std::str::FromStr;
 
 use cryogen_prelude::CompileVariablePlugin;
 
-
 pub struct StringPlugin;
 
 impl CompileVariablePlugin for StringPlugin {
@@ -37,7 +36,6 @@ impl CompileVariablePlugin for StringPlugin {
     }
 }
 
-
 pub struct IntPlugin;
 
 impl CompileVariablePlugin for IntPlugin {
@@ -66,11 +64,10 @@ impl CompileVariablePlugin for IntPlugin {
     fn read_arg(&self, int: &str) -> Result<Self::RenderValue, String> {
         match isize::from_str(int) {
             Ok(i) => Ok(i),
-            Err(e) => Err(format!("error parsing int: {:?}", e))
+            Err(e) => Err(format!("error parsing int: {:?}", e)),
         }
     }
 }
-
 
 pub struct FloatPlugin;
 
@@ -100,11 +97,10 @@ impl CompileVariablePlugin for FloatPlugin {
     fn read_arg(&self, float: &str) -> Result<Self::RenderValue, String> {
         match f64::from_str(float) {
             Ok(f) => Ok(f),
-            Err(e) => Err(format!("error parsing float: {:?}", e))
+            Err(e) => Err(format!("error parsing float: {:?}", e)),
         }
     }
 }
-
 
 pub struct BooleanPlugin;
 
@@ -134,8 +130,7 @@ impl CompileVariablePlugin for BooleanPlugin {
     fn read_arg(&self, boolean: &str) -> Result<Self::RenderValue, String> {
         match bool::from_str(boolean) {
             Ok(b) => Ok(b),
-            Err(e) => Err(format!("error parsing boolean: {:?}", e))
+            Err(e) => Err(format!("error parsing boolean: {:?}", e)),
         }
     }
 }
-

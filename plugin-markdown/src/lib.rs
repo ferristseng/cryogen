@@ -15,7 +15,6 @@ use std::fs::File;
 
 use cryogen_prelude::CompileVariablePlugin;
 
-
 /// Value written to Tera context.
 ///
 #[derive(Serialize)]
@@ -40,17 +39,18 @@ impl RenderedMarkdown {
     }
 }
 
-
 fn contains_metadata_prelude(buf: &[u8]) -> bool {
-    buf.len() >= 4 && &buf[0..4] != &[b'-', b'-', b'-', b'\n'] && buf.len() >= 5 &&
-    &buf[0..5] != &[b'-', b'-', b'-', b'\r', b'\n']
+    buf.len() >= 4 && &buf[0..4] != &[b'-', b'-', b'-', b'\n'] && buf.len() >= 5
+        && &buf[0..5] != &[b'-', b'-', b'-', b'\r', b'\n']
 }
 
 fn contains_metadata_epilogue(buf: &[u8], bytes_read: usize) -> bool {
     let previous_slice_start = buf.len() - bytes_read;
 
-    bytes_read > 3 && &buf[previous_slice_start..previous_slice_start + 3] == &[b'-', b'-', b'-'] &&
-    buf[previous_slice_start + 3..].iter().all(|b| (*b as char).is_whitespace())
+    bytes_read > 3 && &buf[previous_slice_start..previous_slice_start + 3] == &[b'-', b'-', b'-']
+        && buf[previous_slice_start + 3..]
+            .iter()
+            .all(|b| (*b as char).is_whitespace())
 }
 
 /// Read the metadata fence at the beginning of the surrounded by ---.
@@ -84,18 +84,18 @@ fn read_header(file: &mut File) -> Result<Vec<u8>, String> {
                     // find the beginning.
                     //
                     return match reader.seek(SeekFrom::Start(bytes_read + bytes_num as u64)) {
-                               Ok(_) => Ok(data),
-                               Err(e) => {
-                                   Err(format!("failed to seek to start of markdown: {:?}", e))
-                               }
-                           };
+                        Ok(_) => Ok(data),
+                        Err(e) => Err(format!("failed to seek to start of markdown: {:?}", e)),
+                    };
                 }
                 Ok(bytes_num) => bytes_read += bytes_num as u64,
                 Err(e) => {
                     println!("{:?}", e);
-                    return Err(format!("encountered io error while reading markdown metadata: \
-                                        {:?}",
-                                       e));
+                    return Err(format!(
+                        "encountered io error while reading markdown metadata: \
+                         {:?}",
+                        e
+                    ));
                 }
             }
         }
@@ -103,7 +103,6 @@ fn read_header(file: &mut File) -> Result<Vec<u8>, String> {
         Err("file ended before markdown metadata ended".to_string())
     }
 }
-
 
 pub struct MarkdownPlugin {
     yaml_metadata: bool,
@@ -139,50 +138,53 @@ impl CompileVariablePlugin for MarkdownPlugin {
     }
 
     fn additional_args() -> Vec<Arg<'static, 'static>> {
-        vec![Arg::with_name("markdown-yaml-metadata").long("markdown-yaml-metadata"),
-             Arg::with_name("markdown-autolink").long("markdown-autolink"),
-             Arg::with_name("markdown-disable-indented-code")
-                 .long("markdown-disable-indented-code"),
-             Arg::with_name("markdown-fenced-code").long("markdown-fenced-code"),
-             Arg::with_name("markdown-footnotes").long("markdown-footnotes"),
-             Arg::with_name("markdown-highlight").long("markdown-highlight"),
-             Arg::with_name("markdown-math").long("markdown-math"),
-             Arg::with_name("markdown-math-explicit").long("markdown-math-explicit"),
-             Arg::with_name("markdown-no-intra-emphasis").long("markdown-no-intra-emphasis"),
-             Arg::with_name("markdown-quote").long("markdown-quote"),
-             Arg::with_name("markdown-space-headers").long("markdown-space-headers"),
-             Arg::with_name("markdown-strikethrough").long("markdown-strikethrough"),
-             Arg::with_name("markdown-superscript").long("markdown-superscript"),
-             Arg::with_name("markdown-tables").long("markdown-tables"),
-             Arg::with_name("markdown-underline").long("markdown-underline"),
-             Arg::with_name("markdown-sane-defaults")
-                 .long("markdown-sane-defaults")
-                 .conflicts_with_all(&["markdown-yaml-metadata",
-                                       "markdown-fenced-code",
-                                       "markdown-footnotes",
-                                       "markdown-no-intra-emphasis",
-                                       "markdown-strikethrough"])]
+        vec![
+            Arg::with_name("markdown-yaml-metadata").long("markdown-yaml-metadata"),
+            Arg::with_name("markdown-autolink").long("markdown-autolink"),
+            Arg::with_name("markdown-disable-indented-code").long("markdown-disable-indented-code"),
+            Arg::with_name("markdown-fenced-code").long("markdown-fenced-code"),
+            Arg::with_name("markdown-footnotes").long("markdown-footnotes"),
+            Arg::with_name("markdown-highlight").long("markdown-highlight"),
+            Arg::with_name("markdown-math").long("markdown-math"),
+            Arg::with_name("markdown-math-explicit").long("markdown-math-explicit"),
+            Arg::with_name("markdown-no-intra-emphasis").long("markdown-no-intra-emphasis"),
+            Arg::with_name("markdown-quote").long("markdown-quote"),
+            Arg::with_name("markdown-space-headers").long("markdown-space-headers"),
+            Arg::with_name("markdown-strikethrough").long("markdown-strikethrough"),
+            Arg::with_name("markdown-superscript").long("markdown-superscript"),
+            Arg::with_name("markdown-tables").long("markdown-tables"),
+            Arg::with_name("markdown-underline").long("markdown-underline"),
+            Arg::with_name("markdown-sane-defaults")
+                .long("markdown-sane-defaults")
+                .conflicts_with_all(&[
+                    "markdown-yaml-metadata",
+                    "markdown-fenced-code",
+                    "markdown-footnotes",
+                    "markdown-no-intra-emphasis",
+                    "markdown-strikethrough",
+                ]),
+        ]
     }
 
     fn from_args<'a>(args: &'a ArgMatches<'a>) -> MarkdownPlugin {
         MarkdownPlugin {
-            yaml_metadata: args.is_present("markdown-yaml-metadata") ||
-                           args.is_present("markdown-sane-defaults"),
+            yaml_metadata: args.is_present("markdown-yaml-metadata")
+                || args.is_present("markdown-sane-defaults"),
             autolink: args.is_present("markdown-autolink"),
             disable_indented_code: args.is_present("markdown-disable-indented-code"),
-            fenced_code: args.is_present("markdown-fenced-code") ||
-                         args.is_present("markdown-sane-defaults"),
-            footnotes: args.is_present("markdown-footnotes") ||
-                       args.is_present("markdown-sane-defaults"),
+            fenced_code: args.is_present("markdown-fenced-code")
+                || args.is_present("markdown-sane-defaults"),
+            footnotes: args.is_present("markdown-footnotes")
+                || args.is_present("markdown-sane-defaults"),
             highlight: args.is_present("markdown-highlight"),
             math: args.is_present("markdown-math"),
             math_explicit: args.is_present("markdown-math-explicit"),
-            no_intra_emphasis: args.is_present("markdown-no-intra-emphasis") ||
-                               args.is_present("markdown-sane-defaults"),
+            no_intra_emphasis: args.is_present("markdown-no-intra-emphasis")
+                || args.is_present("markdown-sane-defaults"),
             quote: args.is_present("markdown-quote"),
             space_headers: args.is_present("markdown-space-headers"),
-            strikethrough: args.is_present("markdown-strikethrough") ||
-                           args.is_present("markdown-sane-defaults"),
+            strikethrough: args.is_present("markdown-strikethrough")
+                || args.is_present("markdown-sane-defaults"),
             superscript: args.is_present("markdown-superscript"),
             tables: args.is_present("markdown-tables"),
             underline: args.is_present("markdown-underline"),
@@ -267,11 +269,10 @@ impl CompileVariablePlugin for MarkdownPlugin {
         let output = html.render(&markdown);
 
         match output.to_str() {
-            Ok(html) => {
-                Ok(metadata.map_or_else(|| RenderedMarkdown::new(html.to_string()), |metadata| {
-                    RenderedMarkdown::with_metadata(html.to_string(), metadata)
-                }))
-            }
+            Ok(html) => Ok(metadata.map_or_else(
+                || RenderedMarkdown::new(html.to_string()),
+                |metadata| RenderedMarkdown::with_metadata(html.to_string(), metadata),
+            )),
             Err(e) => Err(format!("error generating html from markdown: {:?}", e)),
         }
     }

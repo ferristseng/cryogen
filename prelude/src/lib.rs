@@ -5,7 +5,6 @@ use serde::Serialize;
 
 use clap::{Arg, ArgMatches};
 
-
 /// Defines a mapping between a template variable, and the file to
 /// populate it.
 ///
@@ -23,12 +22,10 @@ impl<'a> VarMapping<'a> {
         let var_name = splits.next().unwrap();
 
         match splits.next() {
-            Some(arg_value) => {
-                Ok(VarMapping {
-                       var_name: var_name,
-                       arg_value: arg_value,
-                   })
-            }
+            Some(arg_value) => Ok(VarMapping {
+                var_name: var_name,
+                arg_value: arg_value,
+            }),
             None => Err("Expected a ':' in var mapping string"),
         }
     }
@@ -53,7 +50,6 @@ impl<'a> VarMapping<'a> {
         self.var_name
     }
 }
-
 
 /// A plugin that can assign a value to a variable in the Tera context from a
 /// file.
