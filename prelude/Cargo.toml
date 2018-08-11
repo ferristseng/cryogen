@@ -1,13 +1,13 @@
 [package]
-name = "cryogen_prelude"
-version = "0.1.1"
-authors = ["Ferris Tseng <ferristseng@fastmail.fm>"]
-description = "Common library for all cryogen modules"
-license-file = "../LICENSE"
-homepage = "https://github.com/ferristseng/cryogen"
-repository = "https://github.com/ferristseng/cryogen"
+name                      = "cryogen_prelude"
+version                   = "0.1.2"
+authors                   = ["Ferris Tseng <ferristseng@fastmail.fm>"]
+description               = "Common library for all cryogen modules"
+license-file              = "../LICENSE"
+homepage                  = "https://github.com/ferristseng/cryogen"
+repository                = "https://github.com/ferristseng/cryogen"
 
 [dependencies]
-serde = "0.9.*"
-tera = "0.8.*"
-clap = "2.20.*"
+serde                     = "1.0.*"
+tera                      = "0.11.*"
+clap                      = "2.32.*"

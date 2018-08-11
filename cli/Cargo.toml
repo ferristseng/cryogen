@@ -1,28 +1,23 @@
 [package]
-name = "cryogen"
-version = "0.1.1"
-authors = ["Ferris Tseng <ferristseng@fastmail.fm>"]
-description = "CLI for rendering Tera templates from data files"
-license-file = "../LICENSE"
-homepage = "https://github.com/ferristseng/cryogen"
-repository = "https://github.com/ferristseng/cryogen"
+name                      = "cryogen"
+version                   = "0.1.2"
+authors                   = ["Ferris Tseng <ferristseng@fastmail.fm>"]
+description               = "CLI for rendering Tera templates from data files"
+license-file              = "../LICENSE"
+homepage                  = "https://github.com/ferristseng/cryogen"
+repository                = "https://github.com/ferristseng/cryogen"
 
 [dependencies]
-tera = "0.8.*"
-clap = "2.20.*"
-cryogen_prelude = { version = "0.1.*", path = "../prelude" }
+clap                      = "2.32.*"
+cryogen_prelude           = { version = "0.1.*", path = "../prelude" }
 cryogen_plugin_primitives = { version = "0.1.*", path = "../plugin-primitives" }
-cryogen_plugin_json = { version = "0.1.*", path = "../plugin-json", optional = true }
-cryogen_plugin_markdown = { version = "0.1.*", path = "../plugin-markdown", optional = true }
-cryogen_plugin_yaml = { version = "0.1.*", path = "../plugin-yaml", optional = true }
+cryogen_plugin_json       = { version = "0.1.*", path = "../plugin-json", optional = true }
+cryogen_plugin_markdown   = { version = "0.1.*", path = "../plugin-markdown", optional = true }
+cryogen_plugin_yaml       = { version = "0.1.*", path = "../plugin-yaml", optional = true }
+tera                      = "0.11.*"
 
 [features]
-default = [
-    "json",
-    "markdown",
-    "yaml"
-]
-
-json = ["cryogen_plugin_json"]
-markdown = ["cryogen_plugin_markdown"]
-yaml = ["cryogen_plugin_yaml"]
+default                   = ["json", "markdown", "yaml"]
+json                      = ["cryogen_plugin_json"]
+markdown                  = ["cryogen_plugin_markdown"]
+yaml                      = ["cryogen_plugin_yaml"]

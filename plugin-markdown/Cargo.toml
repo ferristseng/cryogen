@@ -1,16 +1,16 @@
 [package]
-name = "cryogen_plugin_markdown"
-version = "0.1.1"
-authors = ["Ferris Tseng <ferristseng@fastmail.fm>"]
-description = "Markdown plugin for cryogen"
-license-file = "../LICENSE"
-homepage = "https://github.com/ferristseng/cryogen"
-repository = "https://github.com/ferristseng/cryogen"
+name                      = "cryogen_plugin_markdown"
+version                   = "0.1.2"
+authors                   = ["Ferris Tseng <ferristseng@fastmail.fm>"]
+description               = "Markdown plugin for cryogen"
+license-file              = "../LICENSE"
+homepage                  = "https://github.com/ferristseng/cryogen"
+repository                = "https://github.com/ferristseng/cryogen"
 
 [dependencies]
-serde = "0.9.*"
-serde_derive = "0.9.*"
-serde_yaml = "0.6.*"
-clap = "2.20.*"
-hoedown = "6.0.*"
-cryogen_prelude = { version = "0.1.*", path = "../prelude" }
+clap                      = "2.32.*"
+cryogen_prelude           = { version = "0.1.*", path = "../prelude" }
+hoedown                   = "6.0.*"
+serde                     = "1.0.*"
+serde_derive              = "1.0.*"
+serde_yaml                = "0.7.*"

@@ -1,13 +1,13 @@
 [package]
-name = "cryogen_plugin_yaml"
-version = "0.1.1"
-authors = ["Ferris Tseng <ferristseng@fastmail.fm>"]
-description = "YAML plugin for Cryogen"
-license-file = "../LICENSE"
-homepage = "https://github.com/ferristseng/cryogen"
-repository = "https://github.com/ferristseng/cryogen"
+name                      = "cryogen_plugin_yaml"
+version                   = "0.1.2"
+authors                   = ["Ferris Tseng <ferristseng@fastmail.fm>"]
+description               = "YAML plugin for Cryogen"
+license-file              = "../LICENSE"
+homepage                  = "https://github.com/ferristseng/cryogen"
+repository                = "https://github.com/ferristseng/cryogen"
 
 [dependencies]
-clap = "2.20.*"
-serde_yaml = "0.6.*"
-cryogen_prelude = { version = "0.1.*", path = "../prelude" }
+clap                      = "2.32.*"
+serde_yaml                = "0.7.*"
+cryogen_prelude           = { version = "0.1.*", path = "../prelude" }
