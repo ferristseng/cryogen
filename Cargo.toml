@@ -1,14 +1,10 @@
 [workspace]
 members = [
     "cli",
+    "plugin-github-markdown",
     "plugin-json",
     "plugin-markdown",
     "plugin-primitives",
     "plugin-yaml",
     "prelude"
 ]
-
-[dependencies]
-serde = "0.9.*"
-tera = "0.8.*"
-clap = "2.20.*"

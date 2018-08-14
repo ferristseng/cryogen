@@ -1,0 +1,13 @@
+[package]
+name                      = "cryogen_plugin_github_markdown"
+version                   = "0.1.0"
+authors                   = ["Ferris Tseng <ferristseng@fastmail.fm>"]
+description               = "Github-Flavored Markdown plugin for cryogen"
+license-file              = "../LICENSE"
+homepage                  = "https://github.com/ferristseng/cryogen"
+repository                = "https://github.com/ferristseng/cryogen"
+
+[dependencies]
+clap                      = "2.32.*"
+cryogen_prelude           = { version = "0.1.*", path = "../prelude", features = ["markdown"] }
+comrak                    = { version = "0.2.*", default-features = false }
