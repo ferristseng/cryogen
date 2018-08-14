@@ -1,4 +1,7 @@
+#[macro_use]
 extern crate clap;
+#[cfg(feature = "github-markdown")]
+extern crate cryogen_plugin_github_markdown;
 #[cfg(feature = "json")]
 extern crate cryogen_plugin_json;
 #[cfg(feature = "markdown")]
@@ -15,8 +18,23 @@ use std::fs::File;
 use std::io::{Read, Write};
 use tera::{Context, Tera};
 
-// Opens the tera template specified in ArgMatches.
+// Build a vector of plugins to use.
 //
+macro_rules! plugins {
+    ( $( $(#[$feature:meta])* $plug:ty );*; ) => {
+        {
+            let mut plugins = Vec::new();
+            $(
+                $(#[$feature])*
+                Self::register_plugin::<$plug>(&mut plugins);
+            )*
+            plugins
+        }
+    }
+}
+
+/// Opens the tera template specified in ArgMatches.
+///
 fn open_template<'a>(args: &'a ArgMatches<'a>) -> (&'a str, String) {
     let file_path = args.value_of("TEMPLATE").unwrap();
 
@@ -30,17 +48,17 @@ fn open_template<'a>(args: &'a ArgMatches<'a>) -> (&'a str, String) {
     }
 }
 
-// Command to render a single output file from a tera template.
-//
+/// Command to render a single output file from a tera template.
+///
 struct SingleCommand;
 
 impl SingleCommand {
     const COMMAND_NAME: &'static str = "single";
 
-    fn exec_plugin<'a, T: CompileVariablePlugin>(
-        args: &ArgMatches<'a>,
-        template_vars: &mut Context,
-    ) {
+    fn exec_plugin<'a, T>(args: &ArgMatches<'a>, template_vars: &mut Context)
+    where
+        T: CompileVariablePlugin,
+    {
         let plugin = T::from_args(args);
 
         match args.values_of(T::ARG_NAME) {
@@ -60,6 +78,7 @@ impl SingleCommand {
         }
     }
 
+    #[inline]
     fn register_plugin<T>(plugins: &mut Vec<Arg<'static, 'static>>)
     where
         T: CompileVariablePlugin,
@@ -75,20 +94,22 @@ impl SingleCommand {
     }
 
     fn app<'a, 'b>() -> App<'a, 'b> {
-        let mut plugins = Vec::new();
+        let plugins = plugins! {
+            cryogen_plugin_primitives::StringPlugin;
+            cryogen_plugin_primitives::FloatPlugin;
+            cryogen_plugin_primitives::IntPlugin;
+            cryogen_plugin_primitives::BooleanPlugin;
+            #[cfg(feature = "github-markdown")]
+            cryogen_plugin_github_markdown::GithubMarkdownPlugin;
+            #[cfg(feature = "json")]
+            cryogen_plugin_json::JsonPlugin;
+            #[cfg(feature = "markdown")]
+            cryogen_plugin_markdown::MarkdownPlugin;
+            #[cfg(feature = "yaml")]
+            cryogen_plugin_yaml::YamlPlugin;
+        };
 
-        SingleCommand::register_plugin::<cryogen_plugin_primitives::StringPlugin>(&mut plugins);
-        SingleCommand::register_plugin::<cryogen_plugin_primitives::FloatPlugin>(&mut plugins);
-        SingleCommand::register_plugin::<cryogen_plugin_primitives::IntPlugin>(&mut plugins);
-        SingleCommand::register_plugin::<cryogen_plugin_primitives::BooleanPlugin>(&mut plugins);
-        #[cfg(feature = "json")]
-        SingleCommand::register_plugin::<cryogen_plugin_json::JsonPlugin>(&mut plugins);
-        #[cfg(feature = "markdown")]
-        SingleCommand::register_plugin::<cryogen_plugin_markdown::MarkdownPlugin>(&mut plugins);
-        #[cfg(feature = "yaml")]
-        SingleCommand::register_plugin::<cryogen_plugin_yaml::YamlPlugin>(&mut plugins);
-
-        SubCommand::with_name(SingleCommand::COMMAND_NAME)
+        SubCommand::with_name(Self::COMMAND_NAME)
             .about("Renders a single output file")
             .arg(
                 Arg::with_name("TEMPLATE")
@@ -103,31 +124,29 @@ impl SingleCommand {
         let (template_path, template_contents) = open_template(&args);
         let mut template_vars = Context::new();
 
-        SingleCommand::exec_plugin::<cryogen_plugin_primitives::StringPlugin>(
-            &args,
-            &mut template_vars,
-        );
-        SingleCommand::exec_plugin::<cryogen_plugin_primitives::FloatPlugin>(
-            &args,
-            &mut template_vars,
-        );
-        SingleCommand::exec_plugin::<cryogen_plugin_primitives::IntPlugin>(
-            &args,
-            &mut template_vars,
-        );
-        SingleCommand::exec_plugin::<cryogen_plugin_primitives::BooleanPlugin>(
-            &args,
-            &mut template_vars,
-        );
-        #[cfg(feature = "json")]
-        SingleCommand::exec_plugin::<cryogen_plugin_json::JsonPlugin>(&args, &mut template_vars);
-        #[cfg(feature = "markdown")]
-        SingleCommand::exec_plugin::<cryogen_plugin_markdown::MarkdownPlugin>(
-            &args,
-            &mut template_vars,
-        );
-        #[cfg(feature = "yaml")]
-        SingleCommand::exec_plugin::<cryogen_plugin_yaml::YamlPlugin>(&args, &mut template_vars);
+        macro_rules! exec {
+            ( $( $(#[$feature:meta])* $plug:ty );*; ) => {
+                $(
+                    $(#[$feature])*
+                    Self::exec_plugin::<$plug>(&args, &mut template_vars);
+                )*
+            }
+        }
+
+        exec! {
+            cryogen_plugin_primitives::StringPlugin;
+            cryogen_plugin_primitives::FloatPlugin;
+            cryogen_plugin_primitives::IntPlugin;
+            cryogen_plugin_primitives::BooleanPlugin;
+            #[cfg(feature = "github-markdown")]
+            cryogen_plugin_github_markdown::GithubMarkdownPlugin;
+            #[cfg(feature = "json")]
+            cryogen_plugin_json::JsonPlugin;
+            #[cfg(feature = "markdown")]
+            cryogen_plugin_markdown::MarkdownPlugin;
+            #[cfg(feature = "yaml")]
+            cryogen_plugin_yaml::YamlPlugin;
+        }
 
         match Tera::one_off(&template_contents, &template_vars, false) {
             Ok(rendered) => {
@@ -144,7 +163,7 @@ impl SingleCommand {
 
 fn main() {
     let app = App::new("Cryogen")
-        .version("1.0")
+        .version(crate_version!())
         .author("Ferris T. <ferristseng@fastmail.fm>")
         .about("Render a tera template with file data")
         .subcommand(SingleCommand::app())
