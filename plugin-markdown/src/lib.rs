@@ -1,4 +1,5 @@
 extern crate clap;
+#[macro_use]
 extern crate cryogen_prelude;
 extern crate pulldown_cmark;
 
@@ -8,15 +9,15 @@ use pulldown_cmark::{html, Options, Parser};
 use std::io::Read;
 use std::fs::File;
 
+const MD_YAML_METADATA: &'static str = "markdown-yaml-metadata";
+const MD_FOOTNOTES: &'static str = "markdown-footnotes";
+const MD_TABLES: &'static str = "markdown-tables";
+
 pub struct MarkdownPlugin {
     yaml_metadata: bool,
     footnotes: bool,
     tables: bool,
 }
-
-const MD_YAML_METADATA: &'static str = "markdown-yaml-metadata";
-const MD_FOOTNOTES: &'static str = "markdown-footnotes";
-const MD_TABLES: &'static str = "markdown-tables";
 
 impl CompileVariablePlugin for MarkdownPlugin {
     type RenderValue = RenderedMarkdown;
@@ -29,17 +30,11 @@ impl CompileVariablePlugin for MarkdownPlugin {
 
     #[inline]
     fn additional_args() -> Vec<Arg<'static, 'static>> {
-        macro_rules! arg {
-            ($name: ident; $help: expr) => {
-                Arg::with_name($name).long($name).help($help)
-            };
+        args! {
+            MD_YAML_METADATA ["Enable YAML metadata block"];
+            MD_FOOTNOTES     ["Enable footnotes"];
+            MD_TABLES        ["Enable tables"];
         }
-
-        vec![
-            arg!(MD_YAML_METADATA; "Enable YAML metadata block"),
-            arg!(MD_FOOTNOTES; "Enable footnotes"),
-            arg!(MD_TABLES; "Enable tables"),
-        ]
     }
 
     #[inline]

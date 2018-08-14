@@ -12,6 +12,19 @@ use serde::Serialize;
 #[cfg(feature = "markdown")]
 pub mod markdown;
 
+/// Macro to define very simple lists of clap arguments.
+///
+#[macro_export]
+macro_rules! args {
+    ( $($name: ident [$help: expr]);*; ) => {
+        vec![
+            $(
+                Arg::with_name($name).long($name).help($help),
+            )*
+        ]
+    };
+}
+
 /// Defines a mapping between a template variable, and the file to
 /// populate it.
 ///
