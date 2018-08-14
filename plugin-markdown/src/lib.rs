@@ -1,23 +1,12 @@
 extern crate clap;
 extern crate cryogen_prelude;
 extern crate pulldown_cmark;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
 
 use clap::{Arg, ArgMatches};
-use cryogen_prelude::{CompileVariablePlugin, markdown::{read_header, MarkdownMetadata}};
+use cryogen_prelude::{CompileVariablePlugin, markdown::{read_header, RenderedMarkdown}};
 use pulldown_cmark::{html, Options, Parser};
 use std::io::Read;
 use std::fs::File;
-
-/// Value written to Tera context.
-///
-#[derive(Serialize)]
-pub struct RenderedMarkdown {
-    metadata: Option<MarkdownMetadata>,
-    html: String,
-}
 
 pub struct MarkdownPlugin {
     yaml_metadata: bool,
@@ -98,11 +87,6 @@ impl CompileVariablePlugin for MarkdownPlugin {
 
         html::push_html(&mut html, parser);
 
-        let rendered = RenderedMarkdown {
-            html: html.to_string(),
-            metadata: metadata,
-        };
-
-        Ok(rendered)
+        Ok(RenderedMarkdown::new(metadata, html.to_string()))
     }
 }

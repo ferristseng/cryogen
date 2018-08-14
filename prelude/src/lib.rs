@@ -2,6 +2,9 @@ extern crate clap;
 extern crate serde;
 #[cfg(feature = "markdown")]
 extern crate serde_yaml;
+#[cfg(feature = "markdown")]
+#[macro_use]
+extern crate serde_derive;
 
 use clap::{Arg, ArgMatches};
 use serde::Serialize;

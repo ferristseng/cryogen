@@ -4,6 +4,41 @@ use serde_yaml;
 ///
 pub type MarkdownMetadata = serde_yaml::Value;
 
+/// Value written to Tera context.
+///
+#[derive(Serialize)]
+pub struct RenderedMarkdown {
+    metadata: Option<MarkdownMetadata>,
+    html: String,
+}
+
+impl RenderedMarkdown {
+    /// Creates a new container for rendered markdown.
+    ///
+    #[inline]
+    pub fn new(metadata: Option<MarkdownMetadata>, html: String) -> RenderedMarkdown {
+        RenderedMarkdown { metadata, html }
+    }
+
+    /// Returns YAML metadata.
+    ///
+    #[inline]
+    pub fn metadata(&self) -> Option<&MarkdownMetadata> {
+        if let Some(ref meta) = self.metadata {
+            Some(meta)
+        } else {
+            None
+        }
+    }
+
+    /// Returns rendered html.
+    ///
+    #[inline]
+    pub fn html(&self) -> &str {
+        &self.html[..]
+    }
+}
+
 const DIVIDER: &[u8] = &[b'-', b'-', b'-'];
 const NEWLINE: &[u8] = &[b'\n'];
 const NEWLINE_ALT: &[u8] = &[b'\r', b'\n'];
