@@ -3,8 +3,8 @@ extern crate cryogen_prelude;
 extern crate serde_yaml;
 
 use clap::{Arg, ArgMatches};
-use cryogen_prelude::CompileVariablePlugin;
-use std::fs::File;
+use cryogen_prelude::{CompileVariablePlugin, Interpretation, Source};
+use std::io::Read;
 
 pub struct YamlPlugin;
 
@@ -14,6 +14,8 @@ impl CompileVariablePlugin for YamlPlugin {
     const PLUGIN_NAME: &'static str = "yaml";
 
     const ARG_NAME: &'static str = "yaml";
+
+    const ARG_INTERPRETATION: Interpretation = Interpretation::Path;
 
     const HELP: &'static str = "Assign variable to contents of YAML file";
 
@@ -28,9 +30,10 @@ impl CompileVariablePlugin for YamlPlugin {
     }
 
     #[inline]
-    fn read_arg(&self, path: &str) -> Result<Self::RenderValue, String> {
-        File::open(path)
-            .map_err(|e| e.to_string())
-            .and_then(|f| serde_yaml::from_reader(f).map_err(|e| e.to_string()))
+    fn read<'a, R>(&self, src: Source<'a, R>) -> Result<Self::RenderValue, String>
+    where
+        R: Read,
+    {
+        serde_yaml::from_reader(src).map_err(|e| e.to_string())
     }
 }

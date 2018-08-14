@@ -5,9 +5,9 @@ extern crate cryogen_prelude;
 
 use clap::{Arg, ArgMatches};
 use comrak::{markdown_to_html, ComrakOptions};
-use cryogen_prelude::{CompileVariablePlugin, markdown::{read_header, RenderedMarkdown}};
+use cryogen_prelude::{CompileVariablePlugin, Interpretation, Source,
+                      markdown::{read_header, RenderedMarkdown}};
 use std::io::Read;
-use std::fs::File;
 
 const GFM_YAML_METADATA: &'static str = "gfm-yaml-metadata";
 const GFM_HARDBREAKS: &'static str = "gfm-hardbreaks";
@@ -43,6 +43,8 @@ impl CompileVariablePlugin for GithubMarkdownPlugin {
     const PLUGIN_NAME: &'static str = "gfm";
 
     const ARG_NAME: &'static str = "gfm";
+
+    const ARG_INTERPRETATION: Interpretation = Interpretation::Path;
 
     const HELP: &'static str = "Assign variable to contents of a GitHub-Flavored Markdown file";
 
@@ -82,7 +84,10 @@ impl CompileVariablePlugin for GithubMarkdownPlugin {
         }
     }
 
-    fn read_arg(&self, path: &str) -> Result<RenderedMarkdown, String> {
+    fn read<'a, R>(&self, src: Source<'a, R>) -> Result<RenderedMarkdown, String>
+    where
+        R: Read,
+    {
         let opts = ComrakOptions {
             hardbreaks: self.hardbreaks,
             smart: self.smart_punctuation,
@@ -98,14 +103,8 @@ impl CompileVariablePlugin for GithubMarkdownPlugin {
             ..ComrakOptions::default()
         };
 
-        let mut buffer = String::new();
-
-        File::open(path)
-            .map_err(|e| e.to_string())?
-            .read_to_string(&mut buffer)
-            .map_err(|e| e.to_string())?;
-
-        let mut view = &buffer[..];
+        let data = src.consume()?;
+        let mut view = &data[..];
         let metadata = if self.yaml_metadata {
             match read_header(view.as_bytes()) {
                 Ok((metadata, md_start)) => {

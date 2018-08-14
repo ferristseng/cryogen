@@ -2,8 +2,8 @@ extern crate clap;
 extern crate cryogen_prelude;
 
 use clap::{Arg, ArgMatches};
-use cryogen_prelude::CompileVariablePlugin;
-use std::str::FromStr;
+use cryogen_prelude::{CompileVariablePlugin, Interpretation, Source};
+use std::{io::Read, str::FromStr};
 
 /// Creates a plugin to input a assign a primitive type to a variable.
 ///
@@ -25,6 +25,8 @@ macro_rules! primitive_plugin {
 
             const ARG_NAME: &'static str = $arg;
 
+            const ARG_INTERPRETATION: Interpretation = Interpretation::Raw;
+
             const HELP: &'static str = $help;
 
             #[inline]
@@ -38,8 +40,12 @@ macro_rules! primitive_plugin {
             }
 
             #[inline]
-            fn read_arg(&self, val: &str) -> Result<Self::RenderValue, String> {
-                let $bind = val;
+            fn read<'a, R>(&self, src: Source<'a, R>) -> Result<Self::RenderValue, String>
+            where
+                R: Read
+            {
+                let $bind = src.consume()?;
+                let $bind = &$bind[..];
                 $eval
             }
         }

@@ -13,9 +13,8 @@ extern crate cryogen_prelude;
 extern crate tera;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
-use cryogen_prelude::{CompileVariablePlugin, VarMapping};
-use std::fs::File;
-use std::io::{Read, Write};
+use cryogen_prelude::{CompileVariablePlugin, Interpretation, Source, VarMapping};
+use std::{fs::File, io::{stdout, Read, Write}};
 use tera::{Context, Tera};
 
 // Build a vector of plugins to use.
@@ -26,7 +25,7 @@ macro_rules! plugins {
             let mut plugins = Vec::new();
             $(
                 $(#[$feature])*
-                Self::register_plugin::<$plug>(&mut plugins);
+                register_plugin::<$plug>(&mut plugins);
             )*
             plugins
         }
@@ -48,50 +47,54 @@ fn open_template<'a>(args: &'a ArgMatches<'a>) -> (&'a str, String) {
     }
 }
 
+/// Executes a plugin.
+///
+fn exec_plugin<'a, T>(args: &ArgMatches<'a>, template_vars: &mut Context) -> Result<(), String>
+where
+    T: CompileVariablePlugin,
+{
+    let plugin = T::from_args(args);
+
+    let mappings = args.values_of(T::ARG_NAME).into_iter().flat_map(|a| a);
+    for mapping in mappings.map(VarMapping::from_str_panic) {
+        let src = match T::ARG_INTERPRETATION {
+            Interpretation::Raw => Source::Raw(mapping.arg_value(), 0),
+            Interpretation::Path => {
+                let file = File::open(mapping.arg_value()).map_err(|e| e.to_string())?;
+
+                Source::File(file)
+            }
+        };
+
+        template_vars.add(mapping.var_name(), &plugin.read(src)?);
+    }
+
+    Ok(())
+}
+
+/// Registers a plugin.
+///
+#[inline]
+fn register_plugin<T>(plugins: &mut Vec<Arg<'static, 'static>>)
+where
+    T: CompileVariablePlugin,
+{
+    plugins.push(
+        Arg::with_name(T::PLUGIN_NAME)
+            .long(T::ARG_NAME)
+            .help(T::HELP)
+            .takes_value(true)
+            .multiple(true),
+    );
+    plugins.extend(T::additional_args());
+}
+
 /// Command to render a single output file from a tera template.
 ///
 struct SingleCommand;
 
 impl SingleCommand {
     const COMMAND_NAME: &'static str = "single";
-
-    fn exec_plugin<'a, T>(args: &ArgMatches<'a>, template_vars: &mut Context)
-    where
-        T: CompileVariablePlugin,
-    {
-        let plugin = T::from_args(args);
-
-        match args.values_of(T::ARG_NAME) {
-            Some(mappings) => for mapping in mappings.map(VarMapping::from_str_panic) {
-                match plugin.read_arg(mapping.arg_value()) {
-                    Ok(value) => template_vars.add(mapping.var_name(), &value),
-                    Err(e) => {
-                        panic!(format!(
-                            "failed to parse file for var ({}): {:?}",
-                            mapping.var_name(),
-                            e
-                        ));
-                    }
-                }
-            },
-            None => (),
-        }
-    }
-
-    #[inline]
-    fn register_plugin<T>(plugins: &mut Vec<Arg<'static, 'static>>)
-    where
-        T: CompileVariablePlugin,
-    {
-        plugins.push(
-            Arg::with_name(T::PLUGIN_NAME)
-                .long(T::ARG_NAME)
-                .help(T::HELP)
-                .takes_value(true)
-                .multiple(true),
-        );
-        plugins.extend(T::additional_args());
-    }
 
     fn app<'a, 'b>() -> App<'a, 'b> {
         let plugins = plugins! {
@@ -120,7 +123,7 @@ impl SingleCommand {
             .args(&plugins)
     }
 
-    fn exec<'a>(args: &'a ArgMatches<'a>) {
+    fn exec<'a>(args: &'a ArgMatches<'a>) -> Result<(), String> {
         let (template_path, template_contents) = open_template(&args);
         let mut template_vars = Context::new();
 
@@ -128,7 +131,7 @@ impl SingleCommand {
             ( $( $(#[$feature:meta])* $plug:ty );*; ) => {
                 $(
                     $(#[$feature])*
-                    Self::exec_plugin::<$plug>(&args, &mut template_vars);
+                    exec_plugin::<$plug>(&args, &mut template_vars)?;
                 )*
             }
         }
@@ -148,20 +151,23 @@ impl SingleCommand {
             cryogen_plugin_yaml::YamlPlugin;
         }
 
-        match Tera::one_off(&template_contents, &template_vars, false) {
-            Ok(rendered) => {
-                let _ = ::std::io::stdout().write_all(rendered.as_ref());
-            }
-            Err(e) => panic!(format!(
-                "failed one time render for template ({}): {}",
-                template_path,
-                e.description()
-            )),
-        };
+        Tera::one_off(&template_contents, &template_vars, false)
+            .map_err(|e| {
+                format!(
+                    "failed one time render for template ({}): {}",
+                    template_path,
+                    e.description()
+                )
+            })
+            .and_then(|rendered| {
+                stdout()
+                    .write_all(rendered.as_ref())
+                    .map_err(|e| e.to_string())
+            })
     }
 }
 
-fn main() {
+fn main() -> Result<(), String> {
     let app = App::new("Cryogen")
         .version(crate_version!())
         .author("Ferris T. <ferristseng@fastmail.fm>")
@@ -171,6 +177,6 @@ fn main() {
 
     match app.subcommand() {
         ("single", Some(args)) => SingleCommand::exec(args),
-        _ => panic!("unexpected subcommand"),
+        (cmd, _) => Err(format!("unexpected subcommand ({})", cmd)),
     }
 }

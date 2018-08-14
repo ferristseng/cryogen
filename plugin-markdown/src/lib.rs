@@ -4,10 +4,10 @@ extern crate cryogen_prelude;
 extern crate pulldown_cmark;
 
 use clap::{Arg, ArgMatches};
-use cryogen_prelude::{CompileVariablePlugin, markdown::{read_header, RenderedMarkdown}};
+use cryogen_prelude::{CompileVariablePlugin, Interpretation, Source,
+                      markdown::{read_header, RenderedMarkdown}};
 use pulldown_cmark::{html, Options, Parser};
 use std::io::Read;
-use std::fs::File;
 
 const MD_YAML_METADATA: &'static str = "markdown-yaml-metadata";
 const MD_FOOTNOTES: &'static str = "markdown-footnotes";
@@ -25,6 +25,8 @@ impl CompileVariablePlugin for MarkdownPlugin {
     const PLUGIN_NAME: &'static str = "markdown";
 
     const ARG_NAME: &'static str = "markdown";
+
+    const ARG_INTERPRETATION: Interpretation = Interpretation::Path;
 
     const HELP: &'static str = "Assign variable to contents of a Markdown file";
 
@@ -46,7 +48,10 @@ impl CompileVariablePlugin for MarkdownPlugin {
         }
     }
 
-    fn read_arg(&self, path: &str) -> Result<RenderedMarkdown, String> {
+    fn read<'a, R>(&self, src: Source<'a, R>) -> Result<RenderedMarkdown, String>
+    where
+        R: Read,
+    {
         let mut opts = Options::empty();
 
         if self.footnotes {
@@ -57,14 +62,8 @@ impl CompileVariablePlugin for MarkdownPlugin {
             opts.insert(pulldown_cmark::OPTION_ENABLE_TABLES);
         }
 
-        let mut buffer = String::new();
-
-        File::open(path)
-            .map_err(|e| e.to_string())?
-            .read_to_string(&mut buffer)
-            .map_err(|e| e.to_string())?;
-
-        let mut view = &buffer[..];
+        let data = src.consume()?;
+        let mut view = &data[..];
         let metadata = if self.yaml_metadata {
             match read_header(view.as_bytes()) {
                 Ok((metadata, md_start)) => {

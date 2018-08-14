@@ -8,6 +8,7 @@ extern crate serde_derive;
 
 use clap::{Arg, ArgMatches};
 use serde::Serialize;
+use std::{cmp, borrow::Cow, io::{self, Read}};
 
 #[cfg(feature = "markdown")]
 pub mod markdown;
@@ -71,6 +72,75 @@ impl<'a> VarMapping<'a> {
     }
 }
 
+/// How to interpret the value of an argument.
+///
+pub enum Interpretation {
+    Raw,
+    Path,
+}
+
+/// A source can either be treated like a holder of a String value,
+/// or a readable stream.
+///
+pub enum Source<'a, R>
+where
+    R: Read,
+{
+    /// A raw string file.
+    ///
+    Raw(&'a str, usize),
+
+    /// A local or remote file.
+    ///
+    File(R),
+}
+
+impl<'a, R> Source<'a, R>
+where
+    R: Read,
+{
+    /// Consumes the source, and reads the entire value into a string.
+    ///
+    pub fn consume(self) -> Result<Cow<'a, str>, String> {
+        match self {
+            Source::Raw(raw, _) => Ok(Cow::Borrowed(raw)),
+            Source::File(mut reader) => {
+                let mut buf = String::new();
+
+                reader.read_to_string(&mut buf).map_err(|e| e.to_string())?;
+
+                Ok(Cow::Owned(buf))
+            }
+        }
+    }
+}
+
+impl<'a, R> Read for Source<'a, R>
+where
+    R: Read,
+{
+    fn read(&mut self, buf: &mut [u8]) -> Result<usize, io::Error> {
+        match self {
+            // For raw strings, the raw bytes can just be copied
+            // to the buffer. An index value is tracked to only copy
+            // unseen bytes.
+            &mut Source::Raw(raw, ref mut index) => {
+                let current = *index;
+                let slice = &raw.as_bytes()[current..];
+                let copy_num = cmp::min(buf.len(), slice.len());
+
+                &buf[..copy_num].copy_from_slice(&slice[..copy_num]);
+                *index = current + copy_num;
+
+                Ok(copy_num)
+            }
+            // For wrappers around file handlers, the data can just
+            // be read directly from the buffer.
+            &mut Source::File(ref mut reader) => reader.read(buf),
+        }
+    }
+}
+
 /// A plugin that can assign a value to a variable in the Tera context from a
 /// file.
 ///
@@ -87,6 +157,10 @@ pub trait CompileVariablePlugin {
     ///
     const ARG_NAME: &'static str;
 
+    /// How to interpret a supplied argument.
+    ///
+    const ARG_INTERPRETATION: Interpretation;
+
     /// The help string to display.
     ///
     const HELP: &'static str;
@@ -99,7 +173,9 @@ pub trait CompileVariablePlugin {
     ///
     fn from_args<'a>(args: &'a ArgMatches<'a>) -> Self;
 
-    /// Reads the argument and returns a RenderValue instance.
+    /// Reads the source data, and parses it into a value that can be rendered.
     ///
-    fn read_arg(&self, arg: &str) -> Result<Self::RenderValue, String>;
+    fn read<'a, R>(&self, src: Source<'a, R>) -> Result<Self::RenderValue, String>
+    where
+        R: Read;
 }
