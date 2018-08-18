@@ -36,29 +36,28 @@ pub struct VarMapping<'a> {
 }
 
 impl<'a> VarMapping<'a> {
-    /// Builds a VarMapping from a String
+    /// Unpacks a mapped variable string `<var_name>:<arg_value>`.
     ///
-    pub fn from_str(s: &'a str) -> Result<VarMapping<'a>, &'static str> {
+    pub fn from_str(s: &'a str) -> Result<VarMapping<'a>, String> {
         let mut splits = s.splitn(2, ":");
-        let var_name = splits.next().unwrap();
+        let var_name = if let Some(var_name) = splits.next() {
+            var_name
+        } else {
+            return Err(format!("Expected a variable name to bind to in ({})", s));
+        };
+        let arg_value = if let Some(arg_value) = splits.next() {
+            arg_value
+        } else {
+            return Err(format!(
+                "Expected a value to bind to ({}) in ({})",
+                var_name, s
+            ));
+        };
 
-        match splits.next() {
-            Some(arg_value) => Ok(VarMapping {
-                var_name: var_name,
-                arg_value: arg_value,
-            }),
-            None => Err("Expected a ':' in var mapping string"),
-        }
-    }
-
-    /// Builds a VarMapping from a String, and panics if it fails.
-    ///
-    #[inline]
-    pub fn from_str_panic(s: &'a str) -> VarMapping<'a> {
-        match VarMapping::from_str(s) {
-            Ok(s) => s,
-            Err(e) => panic!(e),
-        }
+        Ok(VarMapping {
+            var_name,
+            arg_value,
+        })
     }
 
     #[inline]

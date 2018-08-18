@@ -56,7 +56,8 @@ where
     let plugin = T::from_args(args);
 
     let mappings = args.values_of(T::ARG_NAME).into_iter().flat_map(|a| a);
-    for mapping in mappings.map(VarMapping::from_str_panic) {
+    for mapping in mappings.map(VarMapping::from_str) {
+        let mapping = mapping?;
         let src = match T::ARG_INTERPRETATION {
             Interpretation::Raw => Source::Raw(mapping.arg_value(), 0),
             Interpretation::Path => {
